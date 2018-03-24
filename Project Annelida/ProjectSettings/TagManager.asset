@@ -3,7 +3,8 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - GameManager
   layers:
   - Default
   - TransparentFX
@@ -38,6 +39,24 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Background
+    uniqueID: 254067241
+    locked: 0
+  - name: ForeGround
+    uniqueID: 3814278327
+    locked: 0
+  - name: Player
+    uniqueID: 29826759
+    locked: 0
+  - name: PlayerItem
+    uniqueID: 1383292401
+    locked: 0
+  - name: Projectiles
+    uniqueID: 2580289849
+    locked: 0
+  - name: Effects
+    uniqueID: 1536707477
+    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0
