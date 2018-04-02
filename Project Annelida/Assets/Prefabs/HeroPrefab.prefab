@@ -205,6 +205,7 @@ MonoBehaviour:
   CurrentProjectilePrefab: {fileID: 1557000632098290, guid: e12d26b1e781d87448d2be58dd78d3f1,
     type: 2}
   ProjectileSpawnpoint: {fileID: 4258755126931666}
+  ItemGraphics: {fileID: 4647975883590032}
 --- !u!212 &212055946140399308
 SpriteRenderer:
   m_ObjectHideFlags: 1

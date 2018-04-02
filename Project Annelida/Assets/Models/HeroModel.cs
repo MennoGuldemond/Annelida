@@ -6,8 +6,8 @@ public class HeroModel
     public float HitPoints { get; set; }
     public int ActionPoints { get; set; }
     public float Speed { get; set; }
-    public float AimAngle { get; set; }
     public float AimPower { get; set; }
 
+    // TODO: add max and min angle range?
     // public List<Ability> Abilities { get; set; }
 }
