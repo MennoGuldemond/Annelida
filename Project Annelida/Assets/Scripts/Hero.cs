@@ -9,14 +9,20 @@ public class Hero : NetworkBehaviour
     public Transform ProjectileSpawnpoint;
     public Transform ItemGraphics;
 
+    public bool UseSmoothMovement = true;
+    public float SmoothTime = 0.2f;
     private Vector3 _serverPositionSmoothVelocity;
 
+    public float CurrentShootPower = 0f;
+    public float MaxShootPower = 2f;
+
     private float _baseAimSpeed = 140f; // Degrees per second.
+    private float _powerupSpeed = 2f;
 
     [SyncVar]
     private Vector3 _serverPosition;
 
-    [SyncVar(hook = "OnAimAngleChange")]
+    [SyncVar]
     private float _aimAngle = 45f;
 
     void Start()
@@ -48,7 +54,16 @@ public class Hero : NetworkBehaviour
         else
         {
             // Is this hero in the correct position?
-            transform.position = Vector3.SmoothDamp(transform.position, _serverPosition, ref _serverPositionSmoothVelocity, 0.25f);
+            if (UseSmoothMovement == true)
+            {
+                transform.position = Vector3.SmoothDamp(transform.position, _serverPosition, ref _serverPositionSmoothVelocity, SmoothTime);
+                ItemGraphics.localRotation = Quaternion.Slerp(ItemGraphics.localRotation, Quaternion.Euler(0, 0, _aimAngle), SmoothTime);
+            }
+            else
+            {
+                transform.position = _serverPosition;
+                ItemGraphics.localRotation = Quaternion.Euler(0, 0, _aimAngle);
+            }
         }
 
         // Generic updates for all clients/server
@@ -64,7 +79,7 @@ public class Hero : NetworkBehaviour
             movement *= 0.2f;
         }
 
-        // TODO: do something with moving up and down slopes.
+        // TODO: do something with moving up and down slopes etc.
         transform.Translate(movement, 0, 0);
 
         // Let the network know that we moved.
@@ -82,16 +97,33 @@ public class Hero : NetworkBehaviour
         // TODO: Get angle limits from hero.
         _aimAngle = Mathf.Clamp(_aimAngle + aimAngleChange, 0, 180);
         ItemGraphics.localRotation = Quaternion.Euler(0, 0, _aimAngle);
+        CmdChangeAimAngle(_aimAngle);
 
-        // Did we shoot?
         // TODO: Change inputs.
-        if (Input.GetButtonUp("Fire"))
+        if (Input.GetButtonDown("Fire"))
+        {
+            // We started to power up an attack, reset power.
+            CurrentShootPower = 0;
+        }
+        if (Input.GetButton("Fire"))
+        {
+            // We are powering up an attack.
+            CurrentShootPower += Time.deltaTime * _powerupSpeed;
+        }
+        if (Input.GetButtonUp("Fire") || CurrentShootPower >= MaxShootPower)
         {
             var shootVelocity = new Vector2(
                 HeroStats.AimPower * Mathf.Cos(_aimAngle * Mathf.Deg2Rad),
                 HeroStats.AimPower * Mathf.Sin(_aimAngle * Mathf.Deg2Rad)
                 );
+
+            // Ajust speed of the attack.
+            shootVelocity *= CurrentShootPower;
             CmdShoot(ProjectileSpawnpoint.position, shootVelocity);
+
+            // Reset power value and end turn.
+            // TODO: End turn.
+            CurrentShootPower = 0;
         }
     }
 
@@ -123,17 +155,9 @@ public class Hero : NetworkBehaviour
         _serverPosition = newPosition;
     }
 
-
-    // Syncvar hooks
-
-    void OnAimAngleChange(float newAngle)
+    [Command]
+    void CmdChangeAimAngle(float newAngle)
     {
-        if (hasAuthority == true)
-        {
-            // This is my hero, I can ignore this.
-            return;
-        }
-
-        // _aimAngle = newAngle;
+        _aimAngle = newAngle;
     }
 }
